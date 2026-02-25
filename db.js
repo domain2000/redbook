@@ -35,6 +35,11 @@ async function initDb() {
                 return data.ai_config.find(c => c.active === 1) || data.ai_config[data.ai_config.length - 1];
             }
             if (query.includes('prompts')) {
+                // If it's querying by id (e.g., SELECT * FROM prompts WHERE id = ?)
+                if (query.includes('WHERE id = ?')) {
+                    return data.prompts.find(p => p.id === params[0]);
+                }
+                // Fallback to old querying by type
                 return data.prompts.find(p => p.type === params[0]);
             }
             return null;
@@ -50,12 +55,27 @@ async function initDb() {
                 data.ai_config.forEach(c => c.active = 0);
             } else if (query.includes('INSERT INTO ai_config')) {
                 data.ai_config.push({ apiKey: params[0], baseUrl: params[1], modelName: params[2], active: 1 });
-            } else if (query.includes('UPDATE prompts SET systemPrompt = ?, userPrompt = ? WHERE id = ?')) {
-                const p = data.prompts.find(pr => pr.id === params[2]);
+            } else if (query.includes('UPDATE prompts SET')) {
+                // UPDATE prompts SET name = ?, systemPrompt = ?, userPrompt = ?, type = ? WHERE id = ?
+                const p = data.prompts.find(pr => pr.id === params[4]);
                 if (p) {
-                    p.systemPrompt = params[0];
-                    p.userPrompt = params[1];
+                    p.name = params[0];
+                    p.systemPrompt = params[1];
+                    p.userPrompt = params[2];
+                    p.type = params[3];
                 }
+            } else if (query.includes('INSERT INTO prompts')) {
+                // INSERT INTO prompts (name, systemPrompt, userPrompt, type) VALUES (?, ?, ?, ?)
+                const nextId = data.prompts.length > 0 ? Math.max(...data.prompts.map(p => p.id)) + 1 : 1;
+                data.prompts.push({
+                    id: nextId,
+                    name: params[0],
+                    systemPrompt: params[1],
+                    userPrompt: params[2],
+                    type: params[3]
+                });
+            } else if (query.includes('DELETE FROM prompts WHERE id = ?')) {
+                data.prompts = data.prompts.filter(p => p.id !== params[0]);
             }
             await fs.writeJson(dbPath, data, { spaces: 2 });
         }

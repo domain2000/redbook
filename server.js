@@ -89,8 +89,30 @@ app.get('/api/prompts', async (req, res) => {
 // Update Prompt
 app.post('/api/prompts', async (req, res) => {
     try {
-        const { id, systemPrompt, userPrompt } = req.body;
-        await db.run('UPDATE prompts SET systemPrompt = ?, userPrompt = ? WHERE id = ?', [systemPrompt, userPrompt, id]);
+        const { id, name, systemPrompt, userPrompt, type } = req.body;
+        await db.run('UPDATE prompts SET name = ?, systemPrompt = ?, userPrompt = ?, type = ? WHERE id = ?', [name, systemPrompt, userPrompt, type, id]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Add new Prompt
+app.post('/api/prompts/add', async (req, res) => {
+    try {
+        const { name, systemPrompt, userPrompt, type } = req.body;
+        await db.run('INSERT INTO prompts (name, systemPrompt, userPrompt, type) VALUES (?, ?, ?, ?)', [name, systemPrompt, userPrompt, type]);
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// Delete Prompt
+app.delete('/api/prompts/:id', async (req, res) => {
+    try {
+        const id = parseInt(req.params.id);
+        await db.run('DELETE FROM prompts WHERE id = ?', [id]);
         res.json({ success: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -153,7 +175,16 @@ app.post('/api/process', async (req, res) => {
         const firstFileLower = mediaFiles[0].toLowerCase();
         const isVideo = firstFileLower.endsWith('.mp4') || firstFileLower.endsWith('.mov');
         const config = await db.get('SELECT * FROM ai_config WHERE active = 1 LIMIT 1');
-        const prompt = await db.get('SELECT * FROM prompts WHERE type = ? LIMIT 1', [isVideo ? 'video' : 'image']);
+
+        let prompt;
+        if (req.body.promptId) {
+            prompt = await db.get('SELECT * FROM prompts WHERE id = ?', [parseInt(req.body.promptId)]);
+        }
+
+        // Fallback or if not specified
+        if (!prompt) {
+            prompt = await db.get('SELECT * FROM prompts WHERE type = ? LIMIT 1', [isVideo ? 'video' : 'image']);
+        }
 
         if (!config || !config.apiKey) {
             return res.status(400).json({ error: '请先配置 AI API 信息' });
