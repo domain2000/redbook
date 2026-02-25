@@ -24,8 +24,8 @@ goto skip_install_node
 :install_node
 echo.
 echo [提示] 检测到您的电脑尚未安装 Node.js 引擎！
-echo [提示] 正在为您全自动下载最新稳定版 Node.js 安装包，请稍候...
-powershell -Command "Invoke-WebRequest -Uri 'https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/v20.11.0/node-v20.11.0-x64.msi' -OutFile 'node_installer.msi'"
+echo [提示] 正在为您全自动下载 Node.js 官方安装程序，请稍候...
+powershell -Command "Invoke-WebRequest -Uri https://nodejs.org/dist/v20.11.0/node-v20.11.0-x64.msi -OutFile node_installer.msi"
 if not exist "node_installer.msi" goto download_node_failed
 
 echo [提示] 下载完成！即将自动弹起安装程序。
