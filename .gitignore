@@ -2,7 +2,7 @@
 # (User explicitly requested to keep node_modules and browser binaries in repo)
 # node_modules/
 # Database files (Contains API Keys and user data)
-*.json
+/*.json
 !package.json
 !package-lock.json
 
