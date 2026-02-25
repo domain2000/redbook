@@ -17,18 +17,42 @@ echo.
 
 echo [2/4] 正在检查 Node.js 基础运行引擎...
 node -v >nul 2>&1
-if %errorlevel% neq 0 (
-    echo.
-    echo [致命错误] 检测到您的电脑尚未安装 Node.js 运行环境！
-    echo 本自动化系统必须依赖 Node.js 才可以启动。
-    echo 请前往官方中文镜像站下载并安装（请一路点击下一步默认安装即可）：
-    echo 下载地址: https://nodejs.pku.edu.cn/download/
-    echo 安装完成后，请重新打开本程序！
-    echo ==========================================
-    pause
-    exit /b
-)
+if %errorlevel% neq 0 goto install_node
 echo Node.js 引擎检测通过。
+goto skip_install_node
+
+:install_node
+echo.
+echo [提示] 检测到您的电脑尚未安装 Node.js 引擎！
+echo [提示] 正在为您全自动下载最新稳定版 Node.js 安装包，请稍候...
+powershell -Command "Invoke-WebRequest -Uri 'https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/v20.11.0/node-v20.11.0-x64.msi' -OutFile 'node_installer.msi'"
+if not exist "node_installer.msi" goto download_node_failed
+
+echo [提示] 下载完成！即将自动弹起安装程序。
+echo [注意] 请在弹出的安装界面中，一直勾选并点击 "Next (下一步)"，直到点击 Finish 完成。
+echo [注意] 安装完毕并关闭界面后，在这个黑框里按任意键继续...
+start /wait node_installer.msi
+del node_installer.msi
+echo.
+echo [提示] 安装流程结束，尝试重新挂载引擎...
+set "PATH=%PATH%;C:\Program Files\nodejs"
+node -v >nul 2>&1
+if %errorlevel% neq 0 goto node_check_failed
+echo Node.js 引擎已成功挂载！
+goto skip_install_node
+
+:download_node_failed
+echo [错误] 自动下载失败，请手动前往 https://nodejs.org 下载安装。
+pause
+exit /b
+
+:node_check_failed
+echo [错误] 似乎没有正确安装，或者环境变量未生效。
+echo [建议] 请关闭本黑色窗口，然后在文件夹里重新双击运行本脚本！
+pause
+exit /b
+
+:skip_install_node
 echo.
 
 echo [3/4] 正在检查依赖包与防封浏览器内核...
