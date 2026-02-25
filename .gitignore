@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Database files (Contains API Keys and user data)
+*.json
+!package.json
+!package-lock.json
+
+# Browser automation data
+.browser-data/
+chrome_user_data/
+
+# User images and media
+images/
+
+# Logs and debugging
+*.log
+DEBUGGING_NOTES.md
+page_structure_diagnosis.json
