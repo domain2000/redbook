@@ -16,21 +16,20 @@ echo 进程已清理.
 echo.
 
 echo [2/4] 正在检查运行环境和依赖...
-if exist "node_modules\" goto skip_install
 
+if exist "node_modules\" goto skip_npm_install
 echo 初次运行或缺少环境依赖，即将为您全自动部署...
 echo 正在极速拉取所需运行库 (可能需要几十秒，请保持网络畅通)...
 call npm install --registry=https://registry.npmmirror.com
-echo 正在为您连接高速骨干网下载内置无头浏览器内核...
+:skip_npm_install
+
+if exist "pw-browsers\" goto skip_browser_install
+echo 正在为您连接高速骨干网下载内置无头浏览器内核 (防系统缺失浏览器环境)...
 set PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/
 call npx playwright install chromium
-echo 依赖环境包搭建完美！
-goto skip_install_end
+:skip_browser_install
 
-:skip_install
-echo 运行依赖环境完整.
-
-:skip_install_end
+echo 运行依赖环境与浏览器内核完整点亮！
 echo.
 
 echo [3/4] 正在启动核心服务...
