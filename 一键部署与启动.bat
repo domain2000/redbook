@@ -24,8 +24,7 @@ call npm install --registry=https://registry.npmmirror.com
 :skip_npm_install
 
 if exist "pw-browsers\" goto skip_browser_install
-echo 正在为您连接高速骨干网下载内置无头浏览器内核 (防系统缺失浏览器环境)...
-set PLAYWRIGHT_DOWNLOAD_HOST=https://npmmirror.com/mirrors/playwright/
+echo 正在为您全速下载内置无头浏览器内核 (防系统缺失浏览器环境)...
 call npx playwright install chromium
 :skip_browser_install
 
@@ -44,7 +43,8 @@ start http://localhost:3001
 echo.
 echo ==========================================
 echo 一键部署与启动流程完成！
-echo 所有的操作界面均已在浏览器弹出，请前往进行控制。
-echo 注意：请不要关闭新弹出的黑色控制台黑匣子。
+echo.
+echo [提示] 所有的操作界面均已在浏览器弹出，请前往进行控制。
+echo [注意] 请不要关闭新弹出的黑色控制台黑匣子。
 echo ==========================================
 pause
