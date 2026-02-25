@@ -16,7 +16,7 @@ echo.
 echo [2/4] 正在检查运行环境和依赖...
 if not exist "node_modules\" (
     echo 初次运行或缺少依赖，正在为您安装所需的环境包，请耐心等待（可能需要几分钟）...
-    npm install
+    call npm install
     echo 依赖环境包搭建完美！
 ) else (
     echo 运行依赖环境完整.
