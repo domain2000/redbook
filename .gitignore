@@ -1,6 +1,6 @@
 # Dependencies
-node_modules/
-
+# (User explicitly requested to keep node_modules and browser binaries in repo)
+# node_modules/
 # Database files (Contains API Keys and user data)
 *.json
 !package.json

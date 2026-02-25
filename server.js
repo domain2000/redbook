@@ -1,6 +1,9 @@
+const path = require('path');
+// 强制将无头浏览器的运行内核隔离至本项目解压包内，避免对用户电脑全局变量依赖
+process.env.PLAYWRIGHT_BROWSERS_PATH = path.join(__dirname, 'pw-browsers');
+
 const express = require('express');
 const cors = require('cors');
-const path = require('path');
 const { initDb } = require('./db');
 const { callAIVision } = require('./aiService');
 const { publishToRedbook } = require('./publishService');
