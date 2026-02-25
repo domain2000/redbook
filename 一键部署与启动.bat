@@ -14,13 +14,20 @@ echo 进程已清理.
 echo.
 
 echo [2/4] 正在检查运行环境和依赖...
-if not exist "node_modules\" (
-    echo 初次运行或缺少依赖，正在为您安装所需的环境包，请耐心等待（可能需要几分钟）...
-    call npm install
-    echo 依赖环境包搭建完美！
-) else (
-    echo 运行依赖环境完整.
-)
+if exist "node_modules\" goto skip_install
+
+echo 初次运行或缺少环境依赖，即将为您全自动部署...
+echo 正在极速拉取所需运行库 (可能需要几十秒，请保持网络畅通)...
+call npm install --registry=https://registry.npmmirror.com
+echo 正在为您下载内嵌专用无头浏览器内核 (防止发布时系统缺失浏览器环境)...
+call npx playwright install chromium
+echo 依赖环境包搭建完美！
+goto skip_install_end
+
+:skip_install
+echo 运行依赖环境完整.
+
+:skip_install_end
 echo.
 
 echo [3/4] 正在启动核心服务...
