@@ -97,24 +97,36 @@ app.post('/api/prompts', async (req, res) => {
     }
 });
 
-// Select Local Folder (Windows/MacOS)
+// Select Local Folder (Windows)
 app.get('/api/select-folder', async (req, res) => {
     try {
-        const dialog = require('node-file-dialog');
-        const config = { type: 'directory' };
-
-        const selected = await dialog(config);
-
-        if (selected && selected.length > 0) {
-            res.json({ path: selected[0] });
-        } else {
-            res.status(500).json({ error: '未选择路径' });
+        const { exec } = require('child_process');
+        // Construct a PowerShell script that opens a folder picker and outputs the path in UTF-8
+        const psScript = `
+        [System.Console]::OutputEncoding = [System.Text.Encoding]::UTF8;
+        Add-Type -AssemblyName System.windows.forms;
+        $f = New-Object System.Windows.Forms.FolderBrowserDialog;
+        $f.Description = '请选择包含图片或视频的素材文件夹';
+        $f.ShowNewFolderButton = $true;
+        if($f.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK){
+            Write-Host $f.SelectedPath;
         }
+        `;
+
+        exec(`powershell -NoProfile -Command "${psScript.replace(/\n/g, ' ')}"`, { encoding: 'utf8' }, (error, stdout, stderr) => {
+            if (error) {
+                console.error('Failed to open folder dialog via PowerShell:', error);
+                return res.status(500).json({ error: '无法打开文件夹选择器' });
+            }
+            const selectedPath = stdout.trim();
+            if (selectedPath) {
+                res.json({ path: selectedPath });
+            } else {
+                // User canceled
+                res.status(200).json({ path: '' });
+            }
+        });
     } catch (err) {
-        if (err && err.message && err.message.includes('Nothing selected')) {
-            // User canceled the dialog
-            return res.status(200).json({ path: '' }); // Return empty path or handled status
-        }
         console.error('Failed to open folder dialog:', err);
         res.status(500).json({ error: '已取消选择或无法打开' });
     }

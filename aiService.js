@@ -2,7 +2,7 @@ const fs = require('fs-extra');
 const path = require('path');
 const axios = require('axios');
 const ffmpeg = require('ffmpeg-static');
-const { execSync } = require('child_process');
+const { execFileSync } = require('child_process');
 const os = require('os');
 
 async function callAIVision(config, systemPrompt, userPrompt, files, imagesDir, extractFramesCount) {
@@ -16,7 +16,7 @@ async function callAIVision(config, systemPrompt, userPrompt, files, imagesDir, 
             // Extract frames using ffmpeg to avoid 413 Payload Too Large
             let durationSec = 5;
             try {
-                execSync(`"${ffmpeg}" -i "${fullPath}"`, { stdio: 'pipe' });
+                execFileSync(ffmpeg, ['-i', fullPath], { stdio: 'pipe' });
             } catch (e) {
                 const out = (e.stderr ? e.stderr.toString() : '') + (e.stdout ? e.stdout.toString() : '');
                 const match = out.match(/Duration: (\d{2}):(\d{2}):(\d{2}\.\d+)/);
@@ -35,7 +35,7 @@ async function callAIVision(config, systemPrompt, userPrompt, files, imagesDir, 
 
                 const outPath = path.join(tempDir, `frame_${i}.jpg`);
                 try {
-                    execSync(`"${ffmpeg}" -y -ss ${time} -i "${fullPath}" -vframes 1 -q:v 4 "${outPath}"`, { stdio: 'pipe' });
+                    execFileSync(ffmpeg, ['-y', '-ss', time.toString(), '-i', fullPath, '-vframes', '1', '-q:v', '4', outPath], { stdio: 'pipe' });
                     if (fs.existsSync(outPath)) {
                         const buffer = await fs.readFile(outPath);
                         mediaContents.push({
